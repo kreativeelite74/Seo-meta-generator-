@@ -1,3 +1,4 @@
+alert("Script loaded!");
 function generateMetaDescription() {
   const blogContent = document.getElementById("blogContent").value;
 
