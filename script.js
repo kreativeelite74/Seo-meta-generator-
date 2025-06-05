@@ -1,62 +1,49 @@
-function generateMeta() {
-  const input = document.getElementById("contentInput").value.trim();
-  const keyword = document.getElementById("keywordInput").value.trim().toLowerCase();
-  const output = document.getElementById("metaOutput");
-  const charCount = document.getElementById("charCount");
-  const keywordStatus = document.getElementById("keywordStatus");
-  const outputContainer = document.getElementById("metaOutputContainer");
-  const copyMsg = document.getElementById("copyMsg");
+function generateMetaDescription() {
+  const blogContent = document.getElementById("blogContent").value;
 
-  if (input.length < 50) {
-    output.textContent = "Please enter at least 50 characters.";
-    charCount.textContent = "0 / 155 characters";
-    keywordStatus.textContent = "";
-    outputContainer.classList.remove("hidden");
+  if (!blogContent.trim()) {
+    alert("Please paste your blog content.");
     return;
   }
 
-  let meta = input.substring(0, 155).replace(/\s+/g, " ").trim();
-  if (input.length > 155) meta += "...";
+  // Step 1: Clean the input
+  const cleanText = blogContent
+    .replace(/[\n\r]+/g, " ") // remove new lines
+    .replace(/[^a-zA-Z0-9 ]/g, "") // remove punctuation
+    .toLowerCase();
 
-  // Highlight keyword if present
-  let displayMeta = meta;
-  if (keyword && meta.toLowerCase().includes(keyword)) {
-    const regex = new RegExp(`(${keyword})`, "gi");
-    displayMeta = meta.replace(regex, '<span class="highlight">$1</span>');
-    keywordStatus.textContent = `✅ Keyword "${keyword}" found in meta description`;
-    keywordStatus.classList.add("found");
-  } else if (keyword) {
-    keywordStatus.textContent = `❌ Keyword "${keyword}" NOT found`;
-    keywordStatus.classList.remove("found");
+  const words = cleanText.split(/\s+/);
+
+  // Step 2: Count word frequency
+  const stopwords = ["the", "is", "in", "of", "to", "and", "a", "with", "for", "on", "this", "that", "by", "an", "as", "it", "are", "at", "from"];
+  const wordFreq = {};
+
+  words.forEach(word => {
+    if (word.length > 2 && !stopwords.includes(word)) {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    }
+  });
+
+  // Step 3: Sort and get top keywords
+  const topKeywords = Object.entries(wordFreq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(entry => entry[0]);
+
+  // Step 4: Build a smart meta description sentence
+  let meta = "";
+
+  if (topKeywords.length >= 2) {
+    meta = `Learn about ${topKeywords[0]} and how it affects ${topKeywords[1]}. Discover insights on ${topKeywords[2]}.`;
+  } else if (topKeywords.length === 1) {
+    meta = `Explore everything you need to know about ${topKeywords[0]}. This guide provides helpful tips and details.`;
   } else {
-    keywordStatus.textContent = "";
+    meta = blogContent.split(".")[0];
   }
 
-  output.innerHTML = displayMeta;
-  charCount.textContent = `${meta.length} / 155 characters`;
-  outputContainer.classList.remove("hidden");
-  copyMsg.classList.add("hidden");
-}
+  // Step 5: Trim to 155 characters
+  meta = meta.substring(0, 155);
 
-function clearFields() {
-  document.getElementById("contentInput").value = "";
-  document.getElementById("keywordInput").value = "";
-  document.getElementById("metaOutput").textContent = "";
-  document.getElementById("charCount").textContent = "0 / 155 characters";
-  document.getElementById("keywordStatus").textContent = "";
-  document.getElementById("metaOutputContainer").classList.add("hidden");
+  // Show result
+  document.getElementById("result").innerText = meta;
 }
-
-function copyMeta() {
-  const tempText = document.createElement("textarea");
-  tempText.value = document.getElementById("metaOutput").innerText;
-  document.body.appendChild(tempText);
-  tempText.select();
-  document.execCommand("copy");
-  document.body.removeChild(tempText);
-  document.getElementById("copyMsg").classList.remove("hidden");
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle("dark");
-      }
