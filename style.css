@@ -121,3 +121,24 @@ body.dark button {
 body.dark button:hover {
   background: #666;
 }
+body.dark {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+body.dark textarea,
+body.dark input,
+body.dark button {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  border-color: #444;
+}
+
+body.dark .container {
+  background-color: #1a1a1a;
+}
+
+body.dark .output-tools,
+body.dark #metaOutputContainer {
+  background-color: #1e1e1e;
+}
