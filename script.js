@@ -11,11 +11,23 @@ function generateMeta() {
     return;
   }
 
-  // Basic smart summarizer: grabs the most informative sentence under 155 characters
+  // Break content into sentences
   const sentences = content.match(/[^.!?]+[.!?]*/g) || [];
-  let meta = sentences.find(s => s.length <= 155) || content.substring(0, 155);
+  let meta = "";
 
-  // Try inserting keyword smartly if missing and possible
+  for (let i = 0; i < sentences.length; i++) {
+    const sentence = sentences[i].trim();
+    if (sentence.length > 40 && sentence.length <= 155) {
+      meta = sentence;
+      break;
+    }
+  }
+
+  if (!meta) {
+    meta = content.substring(0, 155);
+  }
+
+  // Add keyword if not present
   if (keyword && !meta.toLowerCase().includes(keyword)) {
     if (meta.length + keyword.length + 2 <= 155) {
       meta = `${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: ${meta}`;
@@ -53,4 +65,4 @@ function copyMeta() {
 
 function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
-    }
+}
