@@ -1,42 +1,56 @@
-function generateMetaDescription() {
-  const blogContent = document.getElementById("blogContent").value;
+function generateMeta() {
+  const content = document.getElementById("contentInput").value.trim();
+  const keyword = document.getElementById("keywordInput").value.trim().toLowerCase();
+  const output = document.getElementById("metaOutput");
+  const charCount = document.getElementById("charCount");
+  const keywordStatus = document.getElementById("keywordStatus");
+  const outputContainer = document.getElementById("metaOutputContainer");
 
-  if (!blogContent.trim()) {
+  if (!content) {
     alert("Please paste your blog content.");
     return;
   }
 
-  const cleanText = blogContent
-    .replace(/[\n\r]+/g, " ")
-    .replace(/[^a-zA-Z0-9 ]/g, "")
-    .toLowerCase();
+  // Basic smart summarizer: grabs the most informative sentence under 155 characters
+  const sentences = content.match(/[^.!?]+[.!?]*/g) || [];
+  let meta = sentences.find(s => s.length <= 155) || content.substring(0, 155);
 
-  const words = cleanText.split(/\s+/);
-  const stopwords = ["the", "is", "in", "of", "to", "and", "a", "with", "for", "on", "this", "that", "by", "an", "as", "it", "are", "at", "from"];
-  const wordFreq = {};
-
-  words.forEach(word => {
-    if (word.length > 2 && !stopwords.includes(word)) {
-      wordFreq[word] = (wordFreq[word] || 0) + 1;
+  // Try inserting keyword smartly if missing and possible
+  if (keyword && !meta.toLowerCase().includes(keyword)) {
+    if (meta.length + keyword.length + 2 <= 155) {
+      meta = `${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: ${meta}`;
     }
-  });
-
-  const topKeywords = Object.entries(wordFreq)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(entry => entry[0]);
-
-  let meta = "";
-
-  if (topKeywords.length >= 2) {
-    meta = `Learn about ${topKeywords[0]} and how it affects ${topKeywords[1]}. Discover insights on ${topKeywords[2] || topKeywords[0]}.`;
-  } else if (topKeywords.length === 1) {
-    meta = `Explore everything you need to know about ${topKeywords[0]}. This guide provides helpful tips and details.`;
-  } else {
-    meta = blogContent.split(".")[0];
   }
 
-  meta = meta.substring(0, 155);
+  output.innerText = meta;
+  charCount.innerText = `${meta.length} / 155 characters`;
+  keywordStatus.innerText = keyword
+    ? meta.toLowerCase().includes(keyword) 
+      ? "✅ Keyword included" 
+      : "❌ Keyword not found"
+    : "";
 
-  document.getElementById("result").innerText = meta;
+  outputContainer.classList.remove("hidden");
 }
+
+function clearFields() {
+  document.getElementById("contentInput").value = "";
+  document.getElementById("keywordInput").value = "";
+  document.getElementById("metaOutput").innerText = "";
+  document.getElementById("charCount").innerText = "0 / 155 characters";
+  document.getElementById("keywordStatus").innerText = "";
+  document.getElementById("metaOutputContainer").classList.add("hidden");
+}
+
+function copyMeta() {
+  const meta = document.getElementById("metaOutput").innerText;
+  navigator.clipboard.writeText(meta).then(() => {
+    const msg = document.getElementById("copyMsg");
+    msg.classList.remove("hidden");
+    setTimeout(() => msg.classList.add("hidden"), 2000);
+  });
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+    }
